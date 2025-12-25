@@ -14,6 +14,7 @@ Lancer:
 """
 
 import asyncio
+import random
 
 import discord
 from discord import app_commands
@@ -200,6 +201,13 @@ async def main():
     if not config.TOKEN:
         raise RuntimeError("DISCORD_TOKEN manquant. Mets-le dans .env")
     keep_alive()
+    
+    # Délai pour éviter le rate limit Discord lors des redémarrages
+    import time
+    delay = random.randint(3, 10)
+    print(f"⏳ Attente de {delay}s avant connexion...")
+    time.sleep(delay)
+    
     bot = CasinoBot()
 
     @bot.event
@@ -208,6 +216,13 @@ async def main():
 
     try:
         await bot.start(config.TOKEN)
+    except discord.errors.HTTPException as e:
+        if e.status == 429:
+            print("⚠️ Rate limit Discord ! Attends quelques minutes...")
+            time.sleep(60)
+            await bot.start(config.TOKEN)
+        else:
+            raise
     except KeyboardInterrupt:
         pass
     finally:
