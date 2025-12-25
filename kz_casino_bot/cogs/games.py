@@ -287,55 +287,32 @@ class BlackjackView(discord.ui.View):
         player_blackjack = len(self.player_cards) == 2 and player_val == 21
         dealer_blackjack = len(self.dealer_cards) == 2 and dealer_val == 21
         
-        # Récupérer les paramètres configurables
-        win_chance = get_param_value(self.cog.db, "blackjack_win_chance")
+        # Récupérer le payout configurable
         payout = get_param_value(self.cog.db, "blackjack_payout")
         
-        # Déterminer le résultat naturel
-        natural_result = None
+        # Appliquer les VRAIES règles du blackjack
         if player_blackjack and not dealer_blackjack:
-            natural_result = "blackjack"
-        elif dealer_blackjack and not player_blackjack:
-            natural_result = "lose"
-        elif player_val > 21:
-            natural_result = "lose"
-        elif dealer_val > 21:
-            natural_result = "win"
-        elif player_val > dealer_val:
-            natural_result = "win"
-        elif player_val == dealer_val:
-            natural_result = "push"
-        else:
-            natural_result = "lose"
-        
-        # Appliquer la probabilité configurée
-        final_result = natural_result
-        
-        if natural_result in ("win", "blackjack"):
-            # Le joueur devrait gagner - vérifier avec la probabilité
-            if random.random() >= win_chance:
-                final_result = "lose"  # Transformer en défaite
-            else:
-                # Vérifier aussi le flip all-in
-                if not maybe_flip_win_for_all_in(True, self.balance, self.mise):
-                    final_result = "lose"
-        elif natural_result == "lose":
-            # Le joueur devrait perdre - chance de retourner en victoire
-            # Plus win_chance est élevé, plus on a de chances de "sauver" une défaite
-            save_chance = max(0, (win_chance - 0.45) * 2)  # Si win_chance > 45%, possibilité de sauver
-            if save_chance > 0 and random.random() < save_chance:
-                final_result = "win"
-        
-        # Appliquer le résultat final
-        if final_result == "blackjack":
+            # Blackjack naturel = gain x2.5
             gain = int(self.mise * 2.5)
             await self.end_game(interaction, "blackjack", gain)
-        elif final_result == "win":
+        elif dealer_blackjack and not player_blackjack:
+            await self.end_game(interaction, "lose")
+        elif player_val > 21:
+            # Joueur a bust
+            await self.end_game(interaction, "lose")
+        elif dealer_val > 21:
+            # Croupier a bust = joueur gagne
             gain = int(self.mise * payout)
             await self.end_game(interaction, "win", gain)
-        elif final_result == "push":
+        elif player_val > dealer_val:
+            # Joueur a plus = joueur gagne
+            gain = int(self.mise * payout)
+            await self.end_game(interaction, "win", gain)
+        elif player_val == dealer_val:
+            # Égalité = push (remboursement)
             await self.end_game(interaction, "push")
         else:
+            # Croupier a plus = joueur perd
             await self.end_game(interaction, "lose")
 
 
@@ -530,36 +507,50 @@ class GamesCog(commands.Cog):
 
         symbols = ["🍒", "🍋", "🔔", "💎", "7️⃣"]
         
-        # Probabilité de gagner (configurable via /odds)
-        win_chance = get_param_value(self.db, "slots_win_chance")
+        # Paramètres configurables via /odds
         pair_mult = get_param_value(self.db, "slots_pair_mult")
         triple_mult = get_param_value(self.db, "slots_triple_mult")
         jackpot_mult = get_param_value(self.db, "slots_jackpot_mult")
+        forced_win_chance = get_param_value(self.db, "slots_win_chance")
         
-        # Décider d'abord si on gagne ou pas
-        is_win = random.random() < win_chance
-        is_win = maybe_flip_win_for_all_in(is_win, bal, amount)
-        
-        if is_win:
-            # Générer un résultat gagnant
-            win_type = random.random()
-            if win_type < 0.05:  # 5% des victoires = jackpot
-                reel = ["7️⃣", "7️⃣", "7️⃣"]
-                win_mult = jackpot_mult
-            elif win_type < 0.25:  # 20% des victoires = triple
-                sym = random.choice(symbols[:-1])  # Pas de 777 ici
-                reel = [sym, sym, sym]
-                win_mult = triple_mult
-            else:  # 75% des victoires = paire
-                sym = random.choice(symbols)
-                other = random.choice([s for s in symbols if s != sym])
-                reel = [sym, sym, other]
-                random.shuffle(reel)
-                win_mult = pair_mult
+        # Si win_chance > 0, forcer la probabilité (pour limiter les gains)
+        if forced_win_chance > 0:
+            is_win = random.random() < forced_win_chance
+            if is_win:
+                # Générer un résultat gagnant
+                win_type = random.random()
+                if win_type < 0.02:  # 2% des victoires = jackpot 777
+                    reel = ["7️⃣", "7️⃣", "7️⃣"]
+                    win_mult = jackpot_mult
+                elif win_type < 0.15:  # 13% des victoires = triple
+                    sym = random.choice(symbols[:-1])
+                    reel = [sym, sym, sym]
+                    win_mult = triple_mult
+                else:  # 85% des victoires = paire
+                    sym = random.choice(symbols)
+                    other = random.choice([s for s in symbols if s != sym])
+                    reel = [sym, sym, other]
+                    random.shuffle(reel)
+                    win_mult = pair_mult
+            else:
+                # Générer un résultat perdant (3 symboles différents)
+                reel = random.sample(symbols, 3)
+                win_mult = 0
         else:
-            # Générer un résultat perdant (3 symboles différents)
-            reel = random.sample(symbols, 3)
+            # VRAI tirage aléatoire des 3 rouleaux
+            reel = [random.choice(symbols) for _ in range(3)]
+            
+            # Déterminer le gain basé sur le VRAI résultat
             win_mult = 0
+            if reel[0] == reel[1] == reel[2]:
+                # 3 identiques
+                if reel[0] == "7️⃣":
+                    win_mult = jackpot_mult  # Jackpot 777
+                else:
+                    win_mult = triple_mult  # Triple normal
+            elif reel[0] == reel[1] or reel[1] == reel[2] or reel[0] == reel[2]:
+                # 2 identiques (paire)
+                win_mult = pair_mult
 
         if win_mult > 0:
             # Victoire: rembourser mise + profit
@@ -627,70 +618,96 @@ class GamesCog(commands.Cog):
         # Retirer la mise AVANT le jeu
         self.db.add_balance(interaction.user.id, -amount)
 
-        # Récupérer les paramètres configurables
+        # Paramètres configurables via /odds
         green_mult = int(get_param_value(self.db, "roulette_green_mult"))
-        win_chance = get_param_value(self.db, "roulette_win_chance")
+        forced_win_chance = get_param_value(self.db, "roulette_win_chance")
         
-        # Décider d'abord si le joueur gagne (basé sur win_chance)
-        is_win = random.random() < win_chance
-        is_win = maybe_flip_win_for_all_in(is_win, bal, amount)
-        
-        # Générer un spin qui correspond au résultat voulu
-        if is_win:
-            # Générer un spin gagnant pour ce pari
-            if bet_kind == "red":
-                spin = random.choice([n for n in ROULETTE_RED])
-            elif bet_kind == "black":
-                spin = random.choice([n for n in range(1, 37) if n not in ROULETTE_RED])
-            elif bet_kind == "green":
-                spin = 0
-            elif bet_kind == "even":
-                spin = random.choice([n for n in range(2, 37, 2)])
-            elif bet_kind == "odd":
-                spin = random.choice([n for n in range(1, 37, 2)])
-            elif bet_kind == "low":
-                spin = random.randint(1, 18)
-            elif bet_kind == "high":
-                spin = random.randint(19, 36)
-            elif bet_kind == "d1":
-                spin = random.randint(1, 12)
-            elif bet_kind == "d2":
-                spin = random.randint(13, 24)
-            elif bet_kind == "d3":
-                spin = random.randint(25, 36)
-            elif bet_kind == "num":
-                spin = bet_num
+        # Si win_chance > 0, forcer la probabilité (pour limiter les gains)
+        if forced_win_chance > 0:
+            is_win = random.random() < forced_win_chance
+            
+            if is_win:
+                # Générer un spin gagnant pour ce pari
+                if bet_kind == "red":
+                    spin = random.choice(list(ROULETTE_RED))
+                elif bet_kind == "black":
+                    spin = random.choice([n for n in range(1, 37) if n not in ROULETTE_RED])
+                elif bet_kind == "green":
+                    spin = 0
+                elif bet_kind == "even":
+                    spin = random.choice([n for n in range(2, 37, 2)])
+                elif bet_kind == "odd":
+                    spin = random.choice([n for n in range(1, 37, 2)])
+                elif bet_kind == "low":
+                    spin = random.randint(1, 18)
+                elif bet_kind == "high":
+                    spin = random.randint(19, 36)
+                elif bet_kind == "d1":
+                    spin = random.randint(1, 12)
+                elif bet_kind == "d2":
+                    spin = random.randint(13, 24)
+                elif bet_kind == "d3":
+                    spin = random.randint(25, 36)
+                elif bet_kind == "num":
+                    spin = bet_num
+                else:
+                    spin = random.randint(0, 36)
             else:
-                spin = random.randint(0, 36)
+                # Générer un spin perdant pour ce pari
+                if bet_kind == "red":
+                    spin = random.choice([0] + [n for n in range(1, 37) if n not in ROULETTE_RED])
+                elif bet_kind == "black":
+                    spin = random.choice([0] + list(ROULETTE_RED))
+                elif bet_kind == "green":
+                    spin = random.randint(1, 36)
+                elif bet_kind == "even":
+                    spin = random.choice([0] + [n for n in range(1, 37, 2)])
+                elif bet_kind == "odd":
+                    spin = random.choice([0] + [n for n in range(2, 37, 2)])
+                elif bet_kind == "low":
+                    spin = random.choice([0] + list(range(19, 37)))
+                elif bet_kind == "high":
+                    spin = random.randint(0, 18)
+                elif bet_kind == "d1":
+                    spin = random.choice([0] + list(range(13, 37)))
+                elif bet_kind == "d2":
+                    spin = random.choice([0] + list(range(1, 13)) + list(range(25, 37)))
+                elif bet_kind == "d3":
+                    spin = random.randint(0, 24)
+                elif bet_kind == "num":
+                    spin = random.choice([n for n in range(0, 37) if n != bet_num])
+                else:
+                    spin = random.randint(0, 36)
+            
+            win = is_win
         else:
-            # Générer un spin perdant pour ce pari
+            # VRAI tirage aléatoire 0-36
+            spin = random.randint(0, 36)
+            
+            # Déterminer si le joueur gagne basé sur le VRAI résultat
+            win = False
             if bet_kind == "red":
-                losing = [0] + [n for n in range(1, 37) if n not in ROULETTE_RED]
-                spin = random.choice(losing)
+                win = spin != 0 and spin in ROULETTE_RED
             elif bet_kind == "black":
-                losing = [0] + list(ROULETTE_RED)
-                spin = random.choice(losing)
+                win = spin != 0 and spin not in ROULETTE_RED
             elif bet_kind == "green":
-                spin = random.randint(1, 36)
+                win = spin == 0
             elif bet_kind == "even":
-                spin = random.choice([0] + [n for n in range(1, 37, 2)])
+                win = spin != 0 and spin % 2 == 0
             elif bet_kind == "odd":
-                spin = random.choice([0] + [n for n in range(2, 37, 2)])
+                win = spin != 0 and spin % 2 == 1
             elif bet_kind == "low":
-                spin = random.choice([0] + list(range(19, 37)))
+                win = 1 <= spin <= 18
             elif bet_kind == "high":
-                spin = random.randint(0, 18)
+                win = 19 <= spin <= 36
             elif bet_kind == "d1":
-                spin = random.choice([0] + list(range(13, 37)))
+                win = 1 <= spin <= 12
             elif bet_kind == "d2":
-                spin = random.choice([0] + list(range(1, 13)) + list(range(25, 37)))
+                win = 13 <= spin <= 24
             elif bet_kind == "d3":
-                spin = random.randint(0, 24)
+                win = 25 <= spin <= 36
             elif bet_kind == "num":
-                losing = [n for n in range(0, 37) if n != bet_num]
-                spin = random.choice(losing)
-            else:
-                spin = random.randint(0, 36)
+                win = spin == bet_num
         
         color = roulette_color(spin)
         
@@ -709,7 +726,7 @@ class GamesCog(commands.Cog):
         elif bet_kind == "num":
             mult = 36
 
-        if is_win:
+        if win:
             # Victoire: rembourser mise + profit
             profit = int(amount * (mult - 1))  # Profit net (ex: 1000 * (2-1) = 1000)
             self.db.add_balance(interaction.user.id, amount + profit)  # Rembourser mise + profit
@@ -758,17 +775,19 @@ class GamesCog(commands.Cog):
         # Retirer la mise AVANT le jeu
         self.db.add_balance(interaction.user.id, -amount)
         
-        # Probabilité de gain (configurable via /odds)
-        win_chance = get_param_value(self.db, "coinflip_win_chance")
+        # Paramètres configurables via /odds
         payout = get_param_value(self.db, "coinflip_payout")
+        forced_win_chance = get_param_value(self.db, "coinflip_win_chance")
         
-        # Résultat basé sur la probabilité
-        win = random.random() < win_chance
-        res = c if win else ("face" if c == "pile" else "pile")
-        
-        win = maybe_flip_win_for_all_in(win, bal, amount)
-        if not win:
-            res = "face" if c == "pile" else "pile"
+        # Si win_chance > 0, forcer la probabilité (pour limiter les gains)
+        # Sinon, vrai tirage 50/50
+        if forced_win_chance > 0:
+            win = random.random() < forced_win_chance
+            res = c if win else ("face" if c == "pile" else "pile")
+        else:
+            # VRAI tirage 50/50
+            res = random.choice(["pile", "face"])
+            win = (res == c)
         
         if win:
             # Victoire: rembourser mise + profit

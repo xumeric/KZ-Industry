@@ -114,18 +114,18 @@ SHOP_CATEGORIES = ["Protection", "VIP", "Boost", "Cosmetics"]
 
 # Games tuning
 COINFLIP_PAYOUT = float(os.getenv("COINFLIP_PAYOUT") or "1.95")
-COINFLIP_WIN_CHANCE = float(os.getenv("COINFLIP_WIN_CHANCE") or "0.50")  # 50% de chance de gagner
+COINFLIP_WIN_CHANCE = float(os.getenv("COINFLIP_WIN_CHANCE") or "0.48")  # 48% (maison gagne)
 
 # Slots
-SLOTS_WIN_CHANCE = float(os.getenv("SLOTS_WIN_CHANCE") or "0.40")  # 40% de chance de gagner
 SLOTS_PAIR_MULT = float(os.getenv("SLOTS_PAIR_MULT") or "2.0")  # 2 symboles identiques
 SLOTS_TRIPLE_MULT = float(os.getenv("SLOTS_TRIPLE_MULT") or "5.0")  # 3 symboles identiques
 SLOTS_JACKPOT_MULT = float(os.getenv("SLOTS_JACKPOT_MULT") or "10.0")  # 7️⃣7️⃣7️⃣
+SLOTS_WIN_CHANCE = float(os.getenv("SLOTS_WIN_CHANCE") or "0.35")  # 35% (maison gagne)
 
 # Roulette
 ROULETTE_GREEN_MULT = int(os.getenv("ROULETTE_GREEN_MULT") or "14")  # Multiplicateur du 0 (vert)
-ROULETTE_WIN_CHANCE = float(os.getenv("ROULETTE_WIN_CHANCE") or "0.45")  # 45% de chance de gagner
-ROULETTE_SIMPLE_PAYOUT = float(os.getenv("ROULETTE_SIMPLE_PAYOUT") or "1.60")  # rouge/noir/pair/impair/1-18/19-36
+ROULETTE_WIN_CHANCE = float(os.getenv("ROULETTE_WIN_CHANCE") or "0.45")  # 45% (maison gagne)
+ROULETTE_SIMPLE_PAYOUT = float(os.getenv("ROULETTE_SIMPLE_PAYOUT") or "1.95")  # rouge/noir/pair/impair/1-18/19-36
 ROULETTE_DOZEN_PAYOUT = float(os.getenv("ROULETTE_DOZEN_PAYOUT") or "2.90")   # dozen 1-12 etc (true odds 3x)
 ROULETTE_STRAIGHT_PAYOUT = float(os.getenv("ROULETTE_STRAIGHT_PAYOUT") or "35.0")  # straight number (true odds 36x)
 
@@ -134,8 +134,7 @@ GUESS_EXACT_MULT = float(os.getenv("GUESS_EXACT_MULT") or "50.0")  # Nombre exac
 GUESS_CLOSE1_MULT = float(os.getenv("GUESS_CLOSE1_MULT") or "10.0")  # ±1
 GUESS_CLOSE2_MULT = float(os.getenv("GUESS_CLOSE2_MULT") or "5.0")  # ±2
 
-BLACKJACK_PAYOUT = float(os.getenv("BLACKJACK_PAYOUT") or "1.95")  # profit multiplier on win (approx house edge)
-BLACKJACK_WIN_CHANCE = float(os.getenv("BLACKJACK_WIN_CHANCE") or "0.45")  # 45% de chance de gagner
+BLACKJACK_PAYOUT = float(os.getenv("BLACKJACK_PAYOUT") or "1.95")  # profit multiplier on win
 CRASH_HOUSE_EDGE = float(os.getenv("CRASH_HOUSE_EDGE") or "0.05")  # 5% edge
 CRASH_MAX_MULT = float(os.getenv("CRASH_MAX_MULT") or "20.0")
 CRASH_DEFAULT_CASHOUT = float(os.getenv("CRASH_DEFAULT_CASHOUT") or "2.0")

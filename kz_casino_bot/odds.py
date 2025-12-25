@@ -16,17 +16,17 @@ ParamType = Literal["int", "float", "bool"]
 TUNABLE_PARAMS: dict[str, dict[str, Any]] = {
     # === COINFLIP ===
     "coinflip_payout": {"desc": "Multiplicateur coinflip (gain = mise × payout)", "type": "float", "min": 1.0, "max": 3.0, "default": 1.95, "config_attr": "COINFLIP_PAYOUT"},
-    "coinflip_win_chance": {"desc": "Probabilité de gagner coinflip (0.50 = 50%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.50, "config_attr": "COINFLIP_WIN_CHANCE"},
+    "coinflip_win_chance": {"desc": "Proba de gain coinflip (0.48 = 48%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.48, "config_attr": "COINFLIP_WIN_CHANCE"},
 
     # === SLOTS ===
     "slots_pair_mult": {"desc": "Multiplicateur 2 symboles identiques", "type": "float", "min": 1.0, "max": 10.0, "default": 2.0, "config_attr": "SLOTS_PAIR_MULT"},
     "slots_triple_mult": {"desc": "Multiplicateur 3 symboles identiques", "type": "float", "min": 1.0, "max": 50.0, "default": 5.0, "config_attr": "SLOTS_TRIPLE_MULT"},
     "slots_jackpot_mult": {"desc": "Multiplicateur jackpot (7️⃣7️⃣7️⃣)", "type": "float", "min": 1.0, "max": 100.0, "default": 10.0, "config_attr": "SLOTS_JACKPOT_MULT"},
-    "slots_win_chance": {"desc": "Chance de gagner slots (0.40 = 40%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.40, "config_attr": "SLOTS_WIN_CHANCE"},
+    "slots_win_chance": {"desc": "Proba de gain slots (0.35 = 35%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.35, "config_attr": "SLOTS_WIN_CHANCE"},
 
     # === ROULETTE ===
     "roulette_green_mult": {"desc": "Multiplicateur vert (0)", "type": "int", "min": 2, "max": 100, "default": 14, "config_attr": "ROULETTE_GREEN_MULT"},
-    "roulette_win_chance": {"desc": "Probabilité de gagner roulette (0.45 = 45%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.48, "config_attr": "ROULETTE_WIN_CHANCE"},
+    "roulette_win_chance": {"desc": "Proba de gain roulette (0.45 = 45%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.45, "config_attr": "ROULETTE_WIN_CHANCE"},
 
     # === GUESS ===
     "guess_exact_mult": {"desc": "Multiplicateur nombre exact", "type": "float", "min": 1.0, "max": 500.0, "default": 50.0, "config_attr": "GUESS_EXACT_MULT"},
@@ -34,8 +34,7 @@ TUNABLE_PARAMS: dict[str, dict[str, Any]] = {
     "guess_close2_mult": {"desc": "Multiplicateur ±2", "type": "float", "min": 1.0, "max": 50.0, "default": 5.0, "config_attr": "GUESS_CLOSE2_MULT"},
 
     # === BLACKJACK ===
-    "blackjack_payout": {"desc": "Multiplicateur blackjack", "type": "float", "min": 1.0, "max": 3.0, "default": 1.95, "config_attr": "BLACKJACK_PAYOUT"},
-    "blackjack_win_chance": {"desc": "Probabilité de gagner au blackjack (0.45 = 45%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.45, "config_attr": "BLACKJACK_WIN_CHANCE"},
+    "blackjack_payout": {"desc": "Multiplicateur blackjack (gain = mise × payout)", "type": "float", "min": 1.0, "max": 3.0, "default": 1.95, "config_attr": "BLACKJACK_PAYOUT"},
 
     # === CRASH ===
     "crash_house_edge": {"desc": "Avantage maison crash (0.05 = 5%)", "type": "float", "min": 0.0, "max": 0.5, "default": 0.05, "config_attr": "CRASH_HOUSE_EDGE"},
@@ -82,10 +81,10 @@ TUNABLE_PARAMS: dict[str, dict[str, Any]] = {
 
 CATEGORIES: dict[str, list[str]] = {
     "🪙 Coinflip": ["coinflip_payout", "coinflip_win_chance"],
-    "🎰 Slots": ["slots_win_chance", "slots_pair_mult", "slots_triple_mult", "slots_jackpot_mult"],
-    "🎡 Roulette": ["roulette_win_chance", "roulette_green_mult"],
+    "🎰 Slots": ["slots_pair_mult", "slots_triple_mult", "slots_jackpot_mult", "slots_win_chance"],
+    "🎡 Roulette": ["roulette_green_mult", "roulette_win_chance"],
     "🔢 Guess": ["guess_exact_mult", "guess_close1_mult", "guess_close2_mult"],
-    "🃏 Blackjack": ["blackjack_payout", "blackjack_win_chance"],
+    "🃏 Blackjack": ["blackjack_payout"],
     "🚀 Crash": ["crash_house_edge", "crash_max_mult"],
     "⚠️ All-in": ["allin_threshold", "allin_flip_chance", "allin_min_balance"],
     "⚔️ Vol": ["steal_success_rate", "steal_steal_pct", "steal_fail_penalty_pct", "steal_fail_penalty_min", "steal_fail_penalty_max", "sabotage_success_rate", "sabotage_steal_pct"],
