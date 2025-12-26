@@ -15,18 +15,18 @@ ParamType = Literal["int", "float", "bool"]
 
 TUNABLE_PARAMS: dict[str, dict[str, Any]] = {
     # === COINFLIP ===
-    "coinflip_payout": {"desc": "Multiplicateur coinflip (gain = mise × payout)", "type": "float", "min": 1.0, "max": 3.0, "default": 1.95, "config_attr": "COINFLIP_PAYOUT"},
-    "coinflip_win_chance": {"desc": "Proba de gain coinflip (0.48 = 48%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.48, "config_attr": "COINFLIP_WIN_CHANCE"},
+    "coinflip_payout": {"desc": "Multiplicateur coinflip (gain = mise × payout)", "type": "float", "min": 1.0, "max": 3.0, "default": 1.98, "config_attr": "COINFLIP_PAYOUT"},
+    "coinflip_win_chance": {"desc": "Proba de gain coinflip (0.51 = 51%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.51, "config_attr": "COINFLIP_WIN_CHANCE"},
 
     # === SLOTS ===
-    "slots_pair_mult": {"desc": "Multiplicateur 2 symboles identiques", "type": "float", "min": 1.0, "max": 10.0, "default": 2.0, "config_attr": "SLOTS_PAIR_MULT"},
+    "slots_pair_mult": {"desc": "Multiplicateur 2 symboles identiques", "type": "float", "min": 1.0, "max": 10.0, "default": 2.2, "config_attr": "SLOTS_PAIR_MULT"},
     "slots_triple_mult": {"desc": "Multiplicateur 3 symboles identiques", "type": "float", "min": 1.0, "max": 50.0, "default": 5.0, "config_attr": "SLOTS_TRIPLE_MULT"},
-    "slots_jackpot_mult": {"desc": "Multiplicateur jackpot (7️⃣7️⃣7️⃣)", "type": "float", "min": 1.0, "max": 100.0, "default": 10.0, "config_attr": "SLOTS_JACKPOT_MULT"},
-    "slots_win_chance": {"desc": "Proba de gain slots (0.35 = 35%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.35, "config_attr": "SLOTS_WIN_CHANCE"},
+    "slots_jackpot_mult": {"desc": "Multiplicateur jackpot (7️⃣7️⃣7️⃣)", "type": "float", "min": 1.0, "max": 100.0, "default": 12.0, "config_attr": "SLOTS_JACKPOT_MULT"},
+    "slots_win_chance": {"desc": "Proba de gain slots (0.42 = 42%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.42, "config_attr": "SLOTS_WIN_CHANCE"},
 
     # === ROULETTE ===
     "roulette_green_mult": {"desc": "Multiplicateur vert (0)", "type": "int", "min": 2, "max": 100, "default": 14, "config_attr": "ROULETTE_GREEN_MULT"},
-    "roulette_win_chance": {"desc": "Proba de gain roulette (0.45 = 45%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.45, "config_attr": "ROULETTE_WIN_CHANCE"},
+    "roulette_win_chance": {"desc": "Proba de gain roulette (0.50 = 50%)", "type": "float", "min": 0.01, "max": 0.99, "default": 0.50, "config_attr": "ROULETTE_WIN_CHANCE"},
 
     # === GUESS ===
     "guess_exact_mult": {"desc": "Multiplicateur nombre exact", "type": "float", "min": 1.0, "max": 500.0, "default": 50.0, "config_attr": "GUESS_EXACT_MULT"},
@@ -34,11 +34,11 @@ TUNABLE_PARAMS: dict[str, dict[str, Any]] = {
     "guess_close2_mult": {"desc": "Multiplicateur ±2", "type": "float", "min": 1.0, "max": 50.0, "default": 5.0, "config_attr": "GUESS_CLOSE2_MULT"},
 
     # === BLACKJACK ===
-    "blackjack_payout": {"desc": "Multiplicateur blackjack (gain = mise × payout)", "type": "float", "min": 1.0, "max": 3.0, "default": 1.95, "config_attr": "BLACKJACK_PAYOUT"},
+    "blackjack_payout": {"desc": "Multiplicateur blackjack (gain = mise × payout)", "type": "float", "min": 1.0, "max": 3.0, "default": 2.0, "config_attr": "BLACKJACK_PAYOUT"},
 
     # === CRASH ===
-    "crash_house_edge": {"desc": "Avantage maison crash (0.05 = 5%)", "type": "float", "min": 0.0, "max": 0.5, "default": 0.05, "config_attr": "CRASH_HOUSE_EDGE"},
-    "crash_max_mult": {"desc": "Multiplicateur max crash", "type": "float", "min": 1.01, "max": 100.0, "default": 20.0, "config_attr": "CRASH_MAX_MULT"},
+    "crash_house_edge": {"desc": "Avantage maison crash (0.03 = 3%)", "type": "float", "min": 0.0, "max": 0.5, "default": 0.03, "config_attr": "CRASH_HOUSE_EDGE"},
+    "crash_max_mult": {"desc": "Multiplicateur max crash", "type": "float", "min": 1.01, "max": 100.0, "default": 25.0, "config_attr": "CRASH_MAX_MULT"},
 
     # All-in
     "allin_threshold": {"desc": "Seuil all-in (0.90 = 90%)", "type": "float", "min": 0.0, "max": 1.0, "default": 0.90, "config_attr": "ALL_IN_THRESHOLD"},
@@ -56,13 +56,13 @@ TUNABLE_PARAMS: dict[str, dict[str, Any]] = {
     "sabotage_success_rate": {"desc": "Taux réussite sabotage", "type": "float", "min": 0.0, "max": 1.0, "default": 0.12, "config_attr": "SABOTAGE_SUCCESS_P"},
     "sabotage_steal_pct": {"desc": "% volé lors sabotage (0.15 = 15%)", "type": "float", "min": 0.01, "max": 1.0, "default": 0.15, "config_attr": "SABOTAGE_STEAL_PCT"},
 
-    # Éco
-    "daily_amount": {"desc": "Montant daily", "type": "int", "min": 0, "max": 1000000, "default": 500, "config_attr": "DAILY_AMOUNT"},
-    "weekly_amount": {"desc": "Montant weekly", "type": "int", "min": 0, "max": 10000000, "default": 2500, "config_attr": "WEEKLY_AMOUNT"},
-    "work_min": {"desc": "Gain min work", "type": "int", "min": 0, "max": 1000000, "default": 50, "config_attr": "WORK_MIN"},
-    "work_max": {"desc": "Gain max work", "type": "int", "min": 0, "max": 10000000, "default": 250, "config_attr": "WORK_MAX"},
+    # Éco (Option 2)
+    "daily_amount": {"desc": "Montant daily", "type": "int", "min": 0, "max": 1000000, "default": 1500, "config_attr": "DAILY_AMOUNT"},
+    "weekly_amount": {"desc": "Montant weekly", "type": "int", "min": 0, "max": 10000000, "default": 7500, "config_attr": "WEEKLY_AMOUNT"},
+    "work_min": {"desc": "Gain min work", "type": "int", "min": 0, "max": 1000000, "default": 200, "config_attr": "WORK_MIN"},
+    "work_max": {"desc": "Gain max work", "type": "int", "min": 0, "max": 10000000, "default": 500, "config_attr": "WORK_MAX"},
     "min_bet": {"desc": "Mise minimum", "type": "int", "min": 1, "max": 10000000, "default": 10, "config_attr": "MIN_BET"},
-    "max_bet": {"desc": "Mise maximum", "type": "int", "min": 1, "max": 1000000000, "default": 100000, "config_attr": "MAX_BET"},
+    "max_bet": {"desc": "Mise maximum", "type": "int", "min": 1, "max": 1000000000, "default": 1000000, "config_attr": "MAX_BET"},
 
     # PvP
     "pvp_tax": {"desc": "Taxe PvP (%)", "type": "float", "min": 0.0, "max": 0.9, "default": 0.0, "config_attr": "PVP_TAX"},
@@ -124,13 +124,16 @@ def set_param_value(db: Database, param_name: str, value):
     return True, None
 
 def reset_param(db: Database, param_name: str | None = None):
+    """Supprime le paramètre de la DB pour revenir à la valeur par défaut."""
     if param_name is None:
         # reset all
-        for k, pi in TUNABLE_PARAMS.items():
-            db.set_setting(f"tunable_{k}", None)
-        return
-    pi = TUNABLE_PARAMS.get(param_name)
-    if not pi:
+        for k in TUNABLE_PARAMS.keys():
+            db.delete_setting(f"tunable_{k}")
+        return True
+    
+    if param_name not in TUNABLE_PARAMS:
         return False
-    db.set_setting(f"tunable_{param_name}", None)
-    return True
+    
+    # Supprimer explicitement
+    deleted = db.delete_setting(f"tunable_{param_name}")
+    return True  # Retourne True même si rien à supprimer (déjà à défaut)

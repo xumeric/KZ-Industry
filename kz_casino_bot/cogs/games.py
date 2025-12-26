@@ -1040,7 +1040,7 @@ class GamesCog(commands.Cog):
     @app_commands.describe(cible="Joueur ciblé")
     async def sabotage(self, interaction: discord.Interaction, cible: discord.Member):
         if cible.id == interaction.user.id:
-            return await interaction.response.send_message(embed=embed_lose("❌ Sabotage", "Tu ne peux pas te saboter toi-même."))
+            return await interaction.response.send_message(embed=embed_lose("❌ Sabotage", "Tu ne peux pas te saboter toi-même."), ephemeral=True)
         self.db.ensure_user(interaction.user.id, config.START_BALANCE)
         self.db.ensure_user(cible.id, config.START_BALANCE)
 
@@ -1050,17 +1050,19 @@ class GamesCog(commands.Cog):
 
         cost = config.SABOTAGE_COST
         if bal < cost:
-            return await interaction.response.send_message(embed=embed_lose("❌ Sabotage", f"Il te faut **{fmt(cost)}** KZ pour saboter."))
+            return await interaction.response.send_message(embed=embed_lose("❌ Sabotage", f"Il te faut **{fmt(cost)}** KZ pour saboter."), ephemeral=True)
 
-        last = parse_dt(thief.get("last_sabotage")) if "last_sabotage" in thief.keys() else None
+        # Vérifier cooldown - utiliser get() au lieu de .keys()
+        last_sabotage_str = thief["last_sabotage"] if thief["last_sabotage"] else None
+        last = parse_dt(last_sabotage_str) if last_sabotage_str else None
         cd_h = config.SABOTAGE_COOLDOWN_H
         if last and (now_utc() - last) < timedelta(hours=cd_h):
             left = int((timedelta(hours=cd_h) - (now_utc() - last)).total_seconds())
-            return await interaction.response.send_message(embed=embed_lose("⏳ Sabotage", f"Cooldown : **{human_time(left)}**"))
+            return await interaction.response.send_message(embed=embed_lose("⏳ Sabotage", f"Cooldown : **{human_time(left)}**"), ephemeral=True)
 
-        imm_until = parse_dt(victim.get("immunity_until"))
+        imm_until = parse_dt(victim["immunity_until"]) if victim["immunity_until"] else None
         if imm_until and imm_until > now_utc():
-            return await interaction.response.send_message(embed=embed_lose("🛡️ Sabotage bloqué", f"{cible.mention} est immunisé."))
+            return await interaction.response.send_message(embed=embed_lose("🛡️ Sabotage bloqué", f"{cible.mention} est immunisé."), ephemeral=True)
 
         base_p = float(get_param_value(self.db, 'sabotage_success_rate'))
         win = random.random() < base_p

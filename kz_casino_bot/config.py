@@ -32,7 +32,7 @@ COMMANDS_ALLOWED_EVERYWHERE: set[str] = {"help", "panel"}
 
 # ============================================
 
-# Economy
+# Economy (Option 2 - Objectif: 1M en 2-4 semaines)
 START_BALANCE = int(os.getenv("START_BALANCE") or "2500")
 MIN_BET = int(os.getenv("MIN_BET") or "10")
 MAX_BET = int(os.getenv("MAX_BET") or "1000000")
@@ -43,14 +43,14 @@ ALL_IN_THRESHOLD = float(os.getenv("ALL_IN_THRESHOLD") or "0.90")  # ratio bet/b
 ALL_IN_MAX_WIN_FLIP_P = float(os.getenv("ALL_IN_MAX_WIN_FLIP_P") or "0.0")  # DÉSACTIVÉ - était 0.35 (injuste)
 ALL_IN_MIN_BALANCE = int(os.getenv("ALL_IN_MIN_BALANCE") or "500")  # apply only if balance >= this
 
-DAILY_AMOUNT = int(os.getenv("DAILY_AMOUNT") or "500")
+DAILY_AMOUNT = int(os.getenv("DAILY_AMOUNT") or "1500")  # Avant: 500
 DAILY_COOLDOWN_H = int(os.getenv("DAILY_COOLDOWN_H") or "20")
 
-WEEKLY_AMOUNT = int(os.getenv("WEEKLY_AMOUNT") or "2500")
+WEEKLY_AMOUNT = int(os.getenv("WEEKLY_AMOUNT") or "7500")  # Avant: 2500
 WEEKLY_COOLDOWN_D = int(os.getenv("WEEKLY_COOLDOWN_D") or "7")
 
-WORK_MIN = int(os.getenv("WORK_MIN") or "80")
-WORK_MAX = int(os.getenv("WORK_MAX") or "220")
+WORK_MIN = int(os.getenv("WORK_MIN") or "200")  # Avant: 80
+WORK_MAX = int(os.getenv("WORK_MAX") or "500")  # Avant: 220
 WORK_COOLDOWN_MIN = int(os.getenv("WORK_COOLDOWN_MIN") or "30")
 
 TRANSFER_TAX_PCT = float(os.getenv("TRANSFER_TAX_PCT") or "2.0")
@@ -69,10 +69,10 @@ STEAL_FAIL_PENALTY_MAX = int(os.getenv("STEAL_FAIL_PENALTY_MAX") or "200")
 IMMUNITY_PROTECTS_STEAL = int(os.getenv("IMMUNITY_PROTECTS_STEAL") or "1")
 
 # ===== Activity rewards (configurable via /odds set) =====
-ACTIVITY_MSG_TARGET = int(os.getenv("ACTIVITY_MSG_TARGET") or "100")
-ACTIVITY_MSG_REWARD = int(os.getenv("ACTIVITY_MSG_REWARD") or "100")
+ACTIVITY_MSG_TARGET = int(os.getenv("ACTIVITY_MSG_TARGET") or "50")  # Avant: 100
+ACTIVITY_MSG_REWARD = int(os.getenv("ACTIVITY_MSG_REWARD") or "200")  # Avant: 100
 ACTIVITY_MSG_COOLDOWN_SECONDS = int(os.getenv("ACTIVITY_MSG_COOLDOWN_SECONDS") or "15")
-ACTIVITY_VOICE_TARGET_SECONDS = int(os.getenv("ACTIVITY_VOICE_TARGET_SECONDS") or "3600")
+ACTIVITY_VOICE_TARGET_SECONDS = int(os.getenv("ACTIVITY_VOICE_TARGET_SECONDS") or "1800")  # Avant: 3600 (30min au lieu de 1h)
 ACTIVITY_VOICE_REWARD = int(os.getenv("ACTIVITY_VOICE_REWARD") or "1000")
 
 # ===== XP / Niveaux =====
@@ -112,31 +112,31 @@ RARITY_INFO = {
 
 SHOP_CATEGORIES = ["Protection", "VIP", "Boost", "Cosmetics"]
 
-# Games tuning
-COINFLIP_PAYOUT = float(os.getenv("COINFLIP_PAYOUT") or "1.95")
-COINFLIP_WIN_CHANCE = float(os.getenv("COINFLIP_WIN_CHANCE") or "0.48")  # 48% (maison gagne)
+# Games tuning (Option 2 - Objectif: 1M en 2-4 semaines)
+COINFLIP_PAYOUT = float(os.getenv("COINFLIP_PAYOUT") or "1.98")  # Avant: 1.95
+COINFLIP_WIN_CHANCE = float(os.getenv("COINFLIP_WIN_CHANCE") or "0.51")  # Avant: 0.48 (EV ≈ 0%)
 
 # Slots
-SLOTS_PAIR_MULT = float(os.getenv("SLOTS_PAIR_MULT") or "2.0")  # 2 symboles identiques
-SLOTS_TRIPLE_MULT = float(os.getenv("SLOTS_TRIPLE_MULT") or "5.0")  # 3 symboles identiques
-SLOTS_JACKPOT_MULT = float(os.getenv("SLOTS_JACKPOT_MULT") or "10.0")  # 7️⃣7️⃣7️⃣
-SLOTS_WIN_CHANCE = float(os.getenv("SLOTS_WIN_CHANCE") or "0.35")  # 35% (maison gagne)
+SLOTS_PAIR_MULT = float(os.getenv("SLOTS_PAIR_MULT") or "2.2")  # Avant: 2.0
+SLOTS_TRIPLE_MULT = float(os.getenv("SLOTS_TRIPLE_MULT") or "5.0")  # Inchangé
+SLOTS_JACKPOT_MULT = float(os.getenv("SLOTS_JACKPOT_MULT") or "12.0")  # Avant: 10.0
+SLOTS_WIN_CHANCE = float(os.getenv("SLOTS_WIN_CHANCE") or "0.42")  # Avant: 0.35
 
 # Roulette
-ROULETTE_GREEN_MULT = int(os.getenv("ROULETTE_GREEN_MULT") or "14")  # Multiplicateur du 0 (vert)
-ROULETTE_WIN_CHANCE = float(os.getenv("ROULETTE_WIN_CHANCE") or "0.45")  # 45% (maison gagne)
-ROULETTE_SIMPLE_PAYOUT = float(os.getenv("ROULETTE_SIMPLE_PAYOUT") or "1.95")  # rouge/noir/pair/impair/1-18/19-36
-ROULETTE_DOZEN_PAYOUT = float(os.getenv("ROULETTE_DOZEN_PAYOUT") or "2.90")   # dozen 1-12 etc (true odds 3x)
-ROULETTE_STRAIGHT_PAYOUT = float(os.getenv("ROULETTE_STRAIGHT_PAYOUT") or "35.0")  # straight number (true odds 36x)
+ROULETTE_GREEN_MULT = int(os.getenv("ROULETTE_GREEN_MULT") or "14")  # Inchangé
+ROULETTE_WIN_CHANCE = float(os.getenv("ROULETTE_WIN_CHANCE") or "0.50")  # Avant: 0.45 (EV = 0%)
+ROULETTE_SIMPLE_PAYOUT = float(os.getenv("ROULETTE_SIMPLE_PAYOUT") or "2.0")  # Avant: 1.95
+ROULETTE_DOZEN_PAYOUT = float(os.getenv("ROULETTE_DOZEN_PAYOUT") or "3.0")   # Avant: 2.90
+ROULETTE_STRAIGHT_PAYOUT = float(os.getenv("ROULETTE_STRAIGHT_PAYOUT") or "36.0")  # Avant: 35.0
 
 # Guess
-GUESS_EXACT_MULT = float(os.getenv("GUESS_EXACT_MULT") or "50.0")  # Nombre exact
-GUESS_CLOSE1_MULT = float(os.getenv("GUESS_CLOSE1_MULT") or "10.0")  # ±1
-GUESS_CLOSE2_MULT = float(os.getenv("GUESS_CLOSE2_MULT") or "5.0")  # ±2
+GUESS_EXACT_MULT = float(os.getenv("GUESS_EXACT_MULT") or "50.0")  # Inchangé
+GUESS_CLOSE1_MULT = float(os.getenv("GUESS_CLOSE1_MULT") or "10.0")  # Inchangé
+GUESS_CLOSE2_MULT = float(os.getenv("GUESS_CLOSE2_MULT") or "5.0")  # Inchangé
 
-BLACKJACK_PAYOUT = float(os.getenv("BLACKJACK_PAYOUT") or "1.95")  # profit multiplier on win
-CRASH_HOUSE_EDGE = float(os.getenv("CRASH_HOUSE_EDGE") or "0.05")  # 5% edge
-CRASH_MAX_MULT = float(os.getenv("CRASH_MAX_MULT") or "20.0")
+BLACKJACK_PAYOUT = float(os.getenv("BLACKJACK_PAYOUT") or "2.0")  # Avant: 1.95
+CRASH_HOUSE_EDGE = float(os.getenv("CRASH_HOUSE_EDGE") or "0.03")  # Avant: 0.05 (réduit à 3%)
+CRASH_MAX_MULT = float(os.getenv("CRASH_MAX_MULT") or "25.0")  # Avant: 20.0
 CRASH_DEFAULT_CASHOUT = float(os.getenv("CRASH_DEFAULT_CASHOUT") or "2.0")
 
 SABOTAGE_COST = int(os.getenv("SABOTAGE_COST") or "100")

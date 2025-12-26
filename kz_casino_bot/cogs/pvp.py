@@ -734,11 +734,11 @@ class PVPCog(commands.Cog):
         row = self.db.get_user(interaction.user.id)
         if not row:
             return await interaction.response.send_message(embed=embed_neutral("📊 PvP", "Aucune donnée."), ephemeral=True)
-        # sqlite3.Row doesn't support .get
-        g = int(row["pvp_games"]) if "pvp_games" in row.keys() else 0
-        w = int(row["pvp_wins"]) if "pvp_wins" in row.keys() else 0
-        l = int(row["pvp_losses"]) if "pvp_losses" in row.keys() else 0
-        p = int(row["pvp_profit"]) if "pvp_profit" in row.keys() else 0
+        # Accès direct - les colonnes existent toujours dans la table
+        g = int(row["pvp_games"] or 0)
+        w = int(row["pvp_wins"] or 0)
+        l = int(row["pvp_losses"] or 0)
+        p = int(row["pvp_profit"] or 0)
         e = embed_neutral("📊 PvP", f"Parties: **{g}**\nVictoires: **{w}**\nDéfaites: **{l}**\nProfit: **{fmt(p)} KZ**")
         await interaction.response.send_message(embed=e, ephemeral=True)
 
@@ -748,8 +748,8 @@ class PVPCog(commands.Cog):
         row = self.db.get_user(interaction.user.id)
         if not row:
             return await interaction.response.send_message(embed=embed_neutral("🤖 Stats bot", "Aucune donnée."), ephemeral=True)
-        bw = int(row["bot_wins"]) if "bot_wins" in row.keys() else 0
-        bl = int(row["bot_losses"]) if "bot_losses" in row.keys() else 0
+        bw = int(row["bot_wins"] or 0)
+        bl = int(row["bot_losses"] or 0)
         e = embed_neutral("🤖 Stats contre le bot", f"Victoires (1%): **{bw}**\nDéfaites: **{bl}**")
         await interaction.response.send_message(embed=e, ephemeral=True)
 

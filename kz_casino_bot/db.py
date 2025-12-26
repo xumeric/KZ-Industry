@@ -584,6 +584,13 @@ class Database:
                 )
             con.commit()
 
+    def delete_setting(self, key: str) -> bool:
+        """Supprime explicitement un setting de la DB. Retourne True si supprimé."""
+        with self.connect() as con:
+            cur = con.execute("DELETE FROM settings WHERE key=?", (key,))
+            con.commit()
+            return cur.rowcount > 0
+
     # ---- inventory / boosts ----
     # ===== Channel gating (allowed channels + bypass users) =====
     def add_allowed_channel(self, guild_id: int, channel_id: int) -> None:

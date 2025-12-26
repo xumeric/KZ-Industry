@@ -600,18 +600,28 @@ class AdminCog(commands.Cog):
     async def odds_list(self, interaction: discord.Interaction):
         if not is_owner(interaction):
             return await interaction.response.send_message(embed=embed_lose("❌", "Owner uniquement."), ephemeral=True)
+        
+        from datetime import datetime
+        
         categories = CATEGORIES
         e = discord.Embed(title="⚙️ Paramètres", color=config.BRAND["info"])
+        
         for cat, params in categories.items():
             lines = []
             for p in params:
                 pi = TUNABLE_PARAMS[p]
+                # Lire directement depuis la DB
                 cur = get_param_value(self.db, p)
-                mod = "✏️" if cur != pi["default"] else ""
+                default = pi["default"]
+                mod = "✏️" if cur != default else ""
                 val = f"{cur:.2f}" if pi["type"] == "float" else str(cur)
                 lines.append(f"`{p}`: **{val}** {mod}")
             e.add_field(name=cat, value="\n".join(lines), inline=False)
-        await interaction.response.send_message(embed=e)
+        
+        # Ajouter timestamp pour prouver que c'est à jour
+        e.set_footer(text=f"🔄 Mis à jour: {datetime.now().strftime('%H:%M:%S')}")
+        
+        await interaction.response.send_message(embed=e, ephemeral=True)
 
     @odds_group.command(name="set", description="✏️ Modifier un paramètre")
     async def odds_set(self, interaction: discord.Interaction, param: str, valeur: str):
@@ -621,12 +631,23 @@ class AdminCog(commands.Cog):
         pi = TUNABLE_PARAMS.get(param)
         if not pi:
             return await interaction.response.send_message(embed=embed_lose("❌", "Paramètre inconnu. `/odds list`"), ephemeral=True)
+        
+        # Valeur avant
+        old_val = get_param_value(self.db, param)
+        
         ok, err = set_param_value(self.db, param, valeur)
         if not ok:
             return await interaction.response.send_message(embed=embed_lose("❌", err or "Valeur invalide"), ephemeral=True)
-        cur = get_param_value(self.db, param)
-        val = f"{cur:.2f}" if pi["type"] == "float" else str(cur)
-        await interaction.response.send_message(embed=embed_win("✅", f"`{param}` → **{val}**"))
+        
+        # Relire depuis la DB pour confirmer
+        new_val = get_param_value(self.db, param)
+        old_str = f"{old_val:.2f}" if pi["type"] == "float" else str(old_val)
+        new_str = f"{new_val:.2f}" if pi["type"] == "float" else str(new_val)
+        
+        await interaction.response.send_message(
+            embed=embed_win("✅ Paramètre modifié", f"`{param}`\n**{old_str}** → **{new_str}**"),
+            ephemeral=True
+        )
 
     
 
@@ -664,26 +685,43 @@ class AdminCog(commands.Cog):
     @odds_group.command(name="reset", description="♻️ Remet un paramètre (ou tout) par défaut")
     @app_commands.describe(param="Paramètre à reset (ou 'all' pour tout)")
     async def odds_reset(self, interaction: discord.Interaction, param: str):
-        try:
-            if not is_owner(interaction):
-                return await interaction.response.send_message(embed=embed_lose("❌", "Owner uniquement."), ephemeral=True)
+        if not is_owner(interaction):
+            return await interaction.response.send_message(embed=embed_lose("❌", "Owner uniquement."), ephemeral=True)
 
-            p = param.lower().strip()
-            if p in ("all", "*", "all (tout réinitialiser)"):
-                reset_param(self.db, None)
-                return await interaction.response.send_message(embed=embed_win("♻️", "Tous les paramètres ont été réinitialisés."), ephemeral=True)
+        p = param.lower().strip()
+        
+        # Reset all
+        if p in ("all", "*", "all (tout réinitialiser)"):
+            reset_param(self.db, None)
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed_win("♻️", "Tous les paramètres ont été réinitialisés."), ephemeral=True)
+            return
 
-            if p not in TUNABLE_PARAMS:
-                return await interaction.response.send_message(embed=embed_lose("❌", f"Paramètre inconnu: `{p}`\nUtilise `/odds list`"), ephemeral=True)
+        # Paramètre inconnu
+        if p not in TUNABLE_PARAMS:
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed_lose("❌", f"Paramètre inconnu: `{p}`\nUtilise `/odds list`"), ephemeral=True)
+            return
 
-            reset_param(self.db, p)
-            default_val = TUNABLE_PARAMS[p]["default"]
-            await interaction.response.send_message(embed=embed_win("♻️", f"`{p}` remis par défaut: **{default_val}**"), ephemeral=True)
-        except Exception as e:
-            try:
-                await interaction.response.send_message(embed=embed_lose("❌ Erreur", str(e)), ephemeral=True)
-            except:
-                await interaction.followup.send(embed=embed_lose("❌ Erreur", str(e)), ephemeral=True)
+        # Valeur avant reset
+        pi = TUNABLE_PARAMS[p]
+        old_val = get_param_value(self.db, p)
+        default_val = pi["default"]
+        
+        # Reset
+        reset_param(self.db, p)
+        
+        # Valeur après reset (doit être égale à default)
+        new_val = get_param_value(self.db, p)
+        
+        # Formater les valeurs
+        fmt = lambda v: f"{v:.2f}" if pi["type"] == "float" else str(v)
+        
+        if not interaction.response.is_done():
+            await interaction.response.send_message(
+                embed=embed_win("♻️ Reset", f"`{p}`\n**{fmt(old_val)}** → **{fmt(new_val)}** (défaut: {fmt(default_val)})"),
+                ephemeral=True
+            )
 
     @odds_set.autocomplete("param")
     async def param_ac_set(self, interaction: discord.Interaction, current: str):
