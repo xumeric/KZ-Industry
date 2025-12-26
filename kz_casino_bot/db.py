@@ -572,12 +572,16 @@ class Database:
             return default
         return str(row["value"])
 
-    def set_setting(self, key: str, value: str) -> None:
+    def set_setting(self, key: str, value: str | None) -> None:
         with self.connect() as con:
-            con.execute(
-                "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-                (key, value),
-            )
+            if value is None:
+                # Supprimer le paramètre pour revenir à la valeur par défaut
+                con.execute("DELETE FROM settings WHERE key=?", (key,))
+            else:
+                con.execute(
+                    "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                    (key, value),
+                )
             con.commit()
 
     # ---- inventory / boosts ----

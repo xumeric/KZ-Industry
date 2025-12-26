@@ -662,25 +662,39 @@ class AdminCog(commands.Cog):
         await interaction.response.send_message(embed=e, ephemeral=True)
 
     @odds_group.command(name="reset", description="♻️ Remet un paramètre (ou tout) par défaut")
+    @app_commands.describe(param="Paramètre à reset (ou 'all' pour tout)")
     async def odds_reset(self, interaction: discord.Interaction, param: str):
-        if not is_owner(interaction):
-            return await interaction.response.send_message(embed=embed_lose("❌", "Owner uniquement."), ephemeral=True)
+        try:
+            if not is_owner(interaction):
+                return await interaction.response.send_message(embed=embed_lose("❌", "Owner uniquement."), ephemeral=True)
 
-        p = param.lower().strip()
-        if p in ("all", "*"):
-            reset_param(self.db, None)
-            return await interaction.response.send_message(embed=embed_win("♻️", "Tous les paramètres ont été réinitialisés."), ephemeral=True)
+            p = param.lower().strip()
+            if p in ("all", "*", "all (tout réinitialiser)"):
+                reset_param(self.db, None)
+                return await interaction.response.send_message(embed=embed_win("♻️", "Tous les paramètres ont été réinitialisés."), ephemeral=True)
 
-        if p not in TUNABLE_PARAMS:
-            return await interaction.response.send_message(embed=embed_lose("❌", "Paramètre inconnu. `/odds list`"), ephemeral=True)
+            if p not in TUNABLE_PARAMS:
+                return await interaction.response.send_message(embed=embed_lose("❌", f"Paramètre inconnu: `{p}`\nUtilise `/odds list`"), ephemeral=True)
 
-        reset_param(self.db, p)
-        await interaction.response.send_message(embed=embed_win("♻️", f"`{p}` remis par défaut."), ephemeral=True)
+            reset_param(self.db, p)
+            default_val = TUNABLE_PARAMS[p]["default"]
+            await interaction.response.send_message(embed=embed_win("♻️", f"`{p}` remis par défaut: **{default_val}**"), ephemeral=True)
+        except Exception as e:
+            try:
+                await interaction.response.send_message(embed=embed_lose("❌ Erreur", str(e)), ephemeral=True)
+            except:
+                await interaction.followup.send(embed=embed_lose("❌ Erreur", str(e)), ephemeral=True)
 
     @odds_set.autocomplete("param")
-    @odds_reset.autocomplete("param")
-    async def param_ac(self, interaction: discord.Interaction, current: str):
+    async def param_ac_set(self, interaction: discord.Interaction, current: str):
         return [app_commands.Choice(name=n, value=n) for n in TUNABLE_PARAMS if current.lower() in n][:25]
+
+    @odds_reset.autocomplete("param")
+    async def param_ac_reset(self, interaction: discord.Interaction, current: str):
+        # Ajouter "all" en premier pour reset tout
+        choices = [app_commands.Choice(name="all (tout réinitialiser)", value="all")]
+        choices += [app_commands.Choice(name=n, value=n) for n in TUNABLE_PARAMS if current.lower() in n][:24]
+        return choices
 
 
     @odds_group.command(name="gif_list", description="🎞️ Voir les GIFs de victoire")
